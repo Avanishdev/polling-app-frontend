@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
+import { io } from "socket.io-client";
+
+const socket = io(import.meta.env.VITE_API_URL);
 
 const PollDetails = () => {
   const { id } = useParams();
@@ -23,6 +26,13 @@ const PollDetails = () => {
       }
     };
     fetchPoll();
+    socket.on("pollUpdated", (updatedPoll) => {
+      if (updatedPoll._id === id) {
+        setPoll(updatedPoll);
+      }
+    });
+
+    return () => socket.off("pollUpdated");
   }, [id]);
 
   const vote = async (optionIndex) => {
